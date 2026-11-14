@@ -68,3 +68,66 @@ def get_transition_outcomes(state, intended_action):
         outcomes.append((probability, next_state))
 
     return outcomes
+
+
+
+def calculate_action_value(state, action, values, rewards):
+    row, col = state
+
+    total = 0.0
+
+    for probability, next_state in get_transition_outcomes(state, action):
+        next_row, next_col = next_state
+
+        total += probability * values[next_row, next_col]
+
+    return rewards[row, col] + GAMMA * total
+
+
+def value_iteration(rewards):
+    values = np.zeros((ROWS, COLS))
+    policy = np.full((ROWS, COLS), "", dtype=object)
+
+    for iteration in range(MAX_ITERATIONS):
+        new_values = np.zeros((ROWS, COLS))
+        delta = 0.0
+
+        for row in range(ROWS):
+            for col in range(COLS):
+                state = (row, col)
+
+                action_values = []
+
+                for action in ACTIONS:
+                    q_value = calculate_action_value(state, action, values, rewards)
+                    action_values.append(q_value)
+
+                best_value = max(action_values)
+
+                new_values[row, col] = best_value
+
+                delta = max(delta, abs(new_values[row, col] - values[row, col]))
+
+        values = new_values
+
+        if delta < THETA:
+            break
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            state = (row, col)
+
+            best_action = None
+            best_action_value = -float("inf")
+
+            for action in ACTIONS:
+                q_value = calculate_action_value(state, action, values, rewards)
+
+                if q_value > best_action_value:
+                    best_action_value = q_value
+                    best_action = action
+
+            policy[row, col] = ACTION_SYMBOLS[best_action]
+
+    return values, policy, iteration + 1
+
