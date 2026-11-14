@@ -213,3 +213,56 @@ def policy_iteration(rewards):
     return values, symbol_policy, iteration + 1
 
 
+
+def print_grid(grid, title):
+    print(title)
+    print("-" * len(title))
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            print(f"{grid[row, col]:>10.2f}", end=" ")
+        print()
+
+    print()
+
+
+def print_policy(policy, title):
+    print(title)
+    print("-" * len(title))
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            print(f"{policy[row, col]:>3}", end=" ")
+        print()
+
+    print()
+
+
+def main():
+    random.seed(42)
+    np.random.seed(42)
+
+    for case_number, (R1, R2) in enumerate(REWARD_CASES, start=1):
+        print("=" * 70)
+        print(f"Case {case_number}: R1 = {R1}, R2 = {R2}")
+        print("=" * 70)
+
+        rewards = create_reward_grid(R1, R2)
+
+        print_grid(rewards, "Reward Grid")
+
+        vi_values, vi_policy, vi_iterations = value_iteration(rewards)
+
+        print(f"Value Iteration converged in {vi_iterations} iterations.\n")
+        print_grid(vi_values, "Value Iteration Values")
+        print_policy(vi_policy, "Value Iteration Policy")
+
+        pi_values, pi_policy, pi_iterations = policy_iteration(rewards)
+
+        print(f"Policy Iteration converged in {pi_iterations} iterations.\n")
+        print_grid(pi_values, "Policy Iteration Values")
+        print_policy(pi_policy, "Policy Iteration Policy")
+
+
+if __name__ == "__main__":
+    main()
