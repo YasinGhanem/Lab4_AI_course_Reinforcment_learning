@@ -131,3 +131,85 @@ def value_iteration(rewards):
 
     return values, policy, iteration + 1
 
+
+
+def random_policy():
+    policy = np.full((ROWS, COLS), "", dtype=object)
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            policy[row, col] = random.choice(ACTIONS)
+
+    return policy
+
+
+def policy_evaluation(policy, rewards):
+    values = np.zeros((ROWS, COLS))
+
+    for iteration in range(MAX_ITERATIONS):
+        new_values = np.zeros((ROWS, COLS))
+        delta = 0.0
+
+        for row in range(ROWS):
+            for col in range(COLS):
+                state = (row, col)
+                action = policy[row, col]
+
+                new_values[row, col] = calculate_action_value(state, action, values, rewards)
+
+                delta = max(delta, abs(new_values[row, col] - values[row, col]))
+
+        values = new_values
+
+        if delta < THETA:
+            break
+
+    return values
+
+
+def policy_improvement(values, rewards, old_policy):
+    new_policy = np.full((ROWS, COLS), "", dtype=object)
+    policy_stable = True
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            state = (row, col)
+            old_action = old_policy[row, col]
+
+            best_action = None
+            best_action_value = -float("inf")
+
+            for action in ACTIONS:
+                q_value = calculate_action_value(state, action, values, rewards)
+
+                if q_value > best_action_value:
+                    best_action_value = q_value
+                    best_action = action
+
+            new_policy[row, col] = best_action
+
+            if best_action != old_action:
+                policy_stable = False
+
+    return new_policy, policy_stable
+
+
+def policy_iteration(rewards):
+    policy = random_policy()
+
+    for iteration in range(MAX_ITERATIONS):
+        values = policy_evaluation(policy, rewards)
+        policy, stable = policy_improvement(values, rewards, policy)
+
+        if stable:
+            break
+
+    symbol_policy = np.full((ROWS, COLS), "", dtype=object)
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            symbol_policy[row, col] = ACTION_SYMBOLS[policy[row, col]]
+
+    return values, symbol_policy, iteration + 1
+
+
